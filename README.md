@@ -1,7 +1,7 @@
 # Examen Final — Cloud Computing | GKE Lab Práctico
 ### Universidad Da Vinci de Guatemala
 
-> **Duración:** 90 minutos  
+> **Duración:** 120 minutos  
 > **Modalidad:** Laboratorio práctico individual en Google Cloud Platform  
 > **Plataforma:** Google Kubernetes Engine (GKE) Standard
 
