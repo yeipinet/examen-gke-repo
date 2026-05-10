@@ -1,0 +1,26 @@
+# ============================================================
+#  EXAMEN FINAL — Cloud Computing | Universidad Da Vinci GT
+#  Archivo: k8s/backend/service.yaml
+#  Descripcion: Service ClusterIP para el Backend API
+#
+#  QUOTA CRITICA: type: ClusterIP NO consume IPs externas.
+#  NO cambiar a LoadBalancer — causaria quota exceeded
+#  para otros estudiantes en el proyecto compartido.
+# ============================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-api-svc
+  namespace: NAMESPACE_PLACEHOLDER
+  labels:
+    app: backend-api
+    tier: backend
+spec:
+  type: ClusterIP
+  selector:
+    app: backend-api
+  ports:
+  - name:       http
+    protocol:   TCP
+    port:        80
+    targetPort:  8080

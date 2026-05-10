@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Inventario — Examen Cloud Computing</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f1f3f4;
+      padding: 24px;
+    }
+    .header {
+      background: #1a73e8;
+      color: white;
+      padding: 20px 24px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .header h1 { font-size: 22px; margin-bottom: 4px; }
+    .header p  { font-size: 13px; opacity: 0.85; }
+    .status-box {
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .ok  { background: #e6f4ea; color: #137333; border-left: 4px solid #34a853; }
+    .err { background: #fce8e6; color: #c5221f; border-left: 4px solid #ea4335; }
+    .loading { background: #e8f0fe; color: #1a73e8; border-left: 4px solid #1a73e8; }
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    .card h2 { font-size: 16px; color: #202124; margin-bottom: 16px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead th {
+      background: #1a73e8;
+      color: white;
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 500;
+    }
+    tbody td { padding: 9px 12px; border-bottom: 1px solid #e8eaed; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: #f8f9fa; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-ok  { background: #e6f4ea; color: #137333; }
+    .badge-err { background: #fce8e6; color: #c5221f; }
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #9aa0a6;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>&#9729; Sistema de Inventario — GKE</h1>
+    <p>Examen Final · Cloud Computing · Universidad Da Vinci de Guatemala</p>
+  </div>
+
+  <div id="health-box" class="status-box loading">
+    Conectando con el Backend API...
+  </div>
+
+  <div class="card">
+    <h2>Inventario de Productos</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nombre del Producto</th>
+          <th>Cantidad</th>
+          <th>Precio (Q)</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody id="items-body">
+        <tr><td colspan="5" style="text-align:center;color:#9aa0a6">Cargando inventario...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    Arquitectura: Frontend (Nginx) → ClusterIP Service → Backend (Flask/GKE)
+  </div>
+
+  <script>
+    // Cuando se usa kubectl port-forward:
+    //   - Frontend corre en localhost:8081
+    //   - Backend  corre en localhost:8080
+    // En produccion dentro del cluster, Nginx hace proxy a backend-api-svc
+    const BACKEND = (window.location.port === '8081')
+      ? 'http://localhost:8080'
+      : '';   // En cluster: Nginx proxy maneja /api/ internamente
+
+    function fetchHealth() {
+      fetch(BACKEND + '/api/health')
+        .then(r => r.json())
+        .then(d => {
+          const box = document.getElementById('health-box');
+          box.className = 'status-box ok';
+          box.innerHTML =
+            '&#10003; Backend conectado &nbsp;|&nbsp; ' +
+            'App: <strong>' + d.app + '</strong> &nbsp;|&nbsp; ' +
+            'Version: <strong>' + d.version + '</strong> &nbsp;|&nbsp; ' +
+            'Estado: <strong>' + d.status + '</strong>';
+        })
+        .catch(() => {
+          const box = document.getElementById('health-box');
+          box.className = 'status-box err';
+          box.textContent = '✗ Error: No se puede conectar al Backend API. Verifica kubectl port-forward.';
+        });
+    }
+
+    function fetchItems() {
+      fetch(BACKEND + '/api/items')
+        .then(r => r.json())
+        .then(d => {
+          const tbody = document.getElementById('items-body');
+          tbody.innerHTML = d.items.map(item => {
+            const stock = item.cantidad > 10
+              ? '<span class="badge badge-ok">En Stock</span>'
+              : '<span class="badge badge-err">Stock Bajo</span>';
+            return '<tr>' +
+              '<td>' + item.id + '</td>' +
+              '<td>' + item.nombre + '</td>' +
+              '<td>' + item.cantidad + '</td>' +
+              '<td>Q' + item.precio.toFixed(2) + '</td>' +
+              '<td>' + stock + '</td>' +
+              '</tr>';
+          }).join('');
+        })
+        .catch(() => {
+          document.getElementById('items-body').innerHTML =
+            '<tr><td colspan="5" style="color:#c5221f">Error al cargar items del backend.</td></tr>';
+        });
+    }
+
+    fetchHealth();
+    fetchItems();
+  </script>
+
+</body>
+</html>

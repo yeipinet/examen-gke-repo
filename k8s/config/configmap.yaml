@@ -1,0 +1,19 @@
+# ============================================================
+#  EXAMEN FINAL — Cloud Computing | Universidad Da Vinci GT
+#  Archivo: k8s/config/configmap.yaml
+#  Descripcion: ConfigMap con configuracion no sensible
+#
+#  Los valores APP_NAME y APP_VERSION se inyectan como
+#  variables de entorno en los pods del backend.
+#  Los datos en ConfigMap NO estan cifrados.
+# ============================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: NAMESPACE_PLACEHOLDER
+  labels:
+    examen: cloud-computing
+data:
+  app_name:    "Inventario-GKE"
+  app_version: "2.0-examen"

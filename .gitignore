@@ -1,0 +1,28 @@
+# Directorios de trabajo generados por setup.sh (contienen datos del estudiante)
+.work-*/
+
+# Logs de port-forward
+/tmp/pf-*.log
+
+# Archivos de entorno local
+.env
+*.env.local
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Editores
+.vscode/
+.idea/
+*.swp
+*~
+
+# macOS
+.DS_Store
+
+# Credenciales GCP (nunca subir)
+*.json
+service-account*.json
+credentials*.json
